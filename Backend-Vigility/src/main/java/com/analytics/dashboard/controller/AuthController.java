@@ -7,14 +7,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
+@CrossOrigin(
+        origins = {
+                "http://localhost:5173",
+                "https://gregarious-crepe-77d5d2.netlify.app"
+        },
+        allowCredentials = "true"
+)
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {

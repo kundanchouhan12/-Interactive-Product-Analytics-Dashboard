@@ -10,7 +10,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@CrossOrigin(origins ="https://gregarious-crepe-77d5d2.netlify.app", allowCredentials = "true")
 public class AnalyticsController {
 
     @Autowired

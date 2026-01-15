@@ -54,20 +54,19 @@ The project demonstrates:
 
 📂 Project Structure (Overview)
 frontend/
-  ├─ src/
-  │   ├─ components/     # React components for filters, charts, layout
-  │   ├─ pages/          # Login, Dashboard pages
-  │   └─ utils/          # Cookie handling, API calls
+├─ src/
+│ ├─ components/ # React components for filters, charts, layout
+│ ├─ pages/ # Login, Dashboard pages
+│ └─ utils/ # Cookie handling, API calls
 backend/
-  ├─ src/main/java/com/analytics/dashboard/
-  │   ├─ controller/     # API endpoints
-  │   ├─ model/          # User, FeatureClick entities
-  │   ├─ repository/     # JPA repositories
-  │   ├─ security/       # JWT handling
-  │   └─ service/        # Business logic
-  └─ resources/
-      └─ application.properties
-
+├─ src/main/java/com/analytics/dashboard/
+│ ├─ controller/ # API endpoints
+│ ├─ model/ # User, FeatureClick entities
+│ ├─ repository/ # JPA repositories
+│ ├─ security/ # JWT handling
+│ └─ service/ # Business logic
+└─ resources/
+└─ application.properties
 
 2. Configure PostgreSQL in application.properties:
    spring.datasource.url=jdbc:postgresql://localhost:5432/analytics_db

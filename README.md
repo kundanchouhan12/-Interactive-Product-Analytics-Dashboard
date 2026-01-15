@@ -1,159 +1,152 @@
 # -Interactive-Product-Analytics-Dashboard
 README.md
-Product Analytics Dashboard
-Live Demo
+# Interactive Product Analytics Dashboard
 
-Live Demo URL
+## Live Demo
+[View Live Demo](https://your-live-demo-url.com)  
+*(Replace with your actual deployed frontend URL)*
 
-(Replace this with your actual deployed frontend URL)
+---
 
-Project Overview
+## Project Overview
+The **Interactive Product Analytics Dashboard** is a full-stack application built with **React.js** (frontend) and **Spring Boot + PostgreSQL** (backend).  
+It allows product managers to:
 
-This is an Interactive Product Analytics Dashboard built with React (frontend) and Spring Boot + PostgreSQL (backend).
-The dashboard allows product managers to:
+- Track feature usage with interactive charts.
+- Filter analytics by **date**, **age**, and **gender**.
+- Visualize **time-based trends** of feature interactions.
+- Automatically log **user interactions** (clicks on filters, charts, etc.) and update the dashboard in real-time.
 
-Track feature usage through interactive charts.
+The project demonstrates:
 
-Apply filters by date, age, and gender.
+- Full-stack development.
+- JWT-based authentication.
+- Backend API design.
+- Database persistence.
+- Responsive frontend visualization.
 
-Visualize time-based trends of feature usage.
+---
 
-Automatically track user interactions (clicks on filters, charts, etc.) and update the dashboard accordingly.
+## Tech Stack
 
-The project demonstrates full-stack development, including authentication, backend API, database persistence, and responsive frontend charts.
+### Frontend
+- **React.js**  
+- **Material-UI** for UI components  
+- **Recharts** for interactive charts  
+- **Day.js** & **MUI Date Pickers**  
+- **js-cookie** for storing filter preferences  
 
-Tech Stack
+### Backend
+- **Spring Boot**  
+- **PostgreSQL**  
+- **Hibernate / JPA**  
+- **JWT Authentication**  
 
-Frontend:
+---
 
-React.js
+## Local Setup Instructions
 
-Material-UI
+### Backend
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/product-analytics-dashboard.git
 
-Recharts (charts)
+2. Configure PostgreSQL in application.properties:
+   spring.datasource.url=jdbc:postgresql://localhost:5432/analytics_db
+   spring.datasource.username=your_db_username
+   spring.datasource.password=your_db_password
+   spring.jpa.hibernate.ddl-auto=update
 
-Day.js & MUI Date Pickers
-
-js-cookie (for storing filter preferences)
-
-Backend:
-
-Spring Boot
-
-PostgreSQL
-
-Hibernate / JPA
-
-JWT Authentication
-
-Local Setup Instructions
-Backend
-
-Clone the repository:
-
-git clone https://github.com/yourusername/product-analytics-dashboard.git
-cd product-analytics-dashboard/backend
-
-
-Configure PostgreSQL in application.properties:
-
-spring.datasource.url=jdbc:postgresql://localhost:5432/analytics_db
-spring.datasource.username=your_db_username
-spring.datasource.password=your_db_password
-spring.jpa.hibernate.ddl-auto=update
-
-
-Run the backend:
-
-./mvnw spring-boot:run
-
-
+3. Run the backend:
+   ./mvnw spring-boot:run
 Backend runs at: http://localhost:8080
 
-Frontend
+Frontend : 
 
-Open a new terminal:
-
-cd ../frontend
-npm install
-npm start
-
+1. Open a new terminal and navigate to frontend:
+   cd ../frontend
+   npm install
+   npm start
 
 Frontend runs at: http://localhost:5173
 
-Login using seeded users or create new ones via /register.
+2. Login/Register:
+   Use seeded users or create new users via /register.
 
-Architectural Choices
+---
 
-Backend API Design:
+## ⚛️ Frontend
 
-/register & /login → JWT Authentication.
+- **Responsive UI** built with `React` + `Material-UI`  
+- **Charts** built using `Recharts`; filters update queries dynamically  
+- **Persistence**: Last selected filters stored in cookies  
 
-/track → Logs feature click interactions.
+---
 
-/analytics → Aggregates feature click data by date, age, gender.
+## 🏗 Architectural Choices
 
-Database Design:
+### 🔹 Backend API
 
-User table stores user info (username, password, age, gender).
+- **`/register` & `/login`** → JWT authentication  
+- **`/track`** → Logs feature click interactions  
+- **`/analytics`** → Aggregates feature click data by **date, age, gender**  
 
-FeatureClick table stores clicks per feature with timestamp and user reference.
+### 🔹 Database
 
-Frontend Design:
+- **User table**: Stores user info (**username, password, age, gender**)  
+- **FeatureClick table**: Stores feature click events with **timestamp** and **user reference**  
 
-React + Material UI for responsive UI.
+### 🔹 Frontend
 
-Charts built using Recharts; filters and date pickers update queries.
+- **Responsive UI** built with `React + Material-UI`  
+- **Interactive Charts** with `Recharts`; filters update queries dynamically  
+- **Filter Persistence**: Stores last selected filters in cookies  
 
-Cookies store last selected filters for persistence.
+### 🔹 Data Flow
 
-Data Flow:
+1. User interacts with the dashboard  
+2. Frontend sends **POST `/track`** to backend  
+3. Backend stores click in database  
+4. Dashboard updates analytics on refresh  
 
-User interacts → frontend fires POST /track → backend stores click → dashboard reflects updated analytics on refresh.
+---
 
-Seed Instructions (Dummy Data)
+## 🌱 Seed Instructions (Dummy Data)
 
-The project includes a seed script to populate the database with dummy users and clicks for demonstration:
+The project includes a seed script to populate the database with **dummy users** and **feature click events** for demonstration.
 
-Backend Seed (Spring Boot CommandLineRunner):
+### 🔹 Backend Seed
 
+Run backend with:
+```bash
 mvn spring-boot:run
 
 
-Seed automatically inserts:
-
-10 users with varied ages and genders
-
-50–100 feature click events across different dates
-
-This ensures charts are populated initially.
-
 Custom Seeding:
+Modify SeedData.java to add more features, users, or dates.
 
-You can modify SeedData.java to add more features, users, or dates.
+---
 
-Short Essay: Scaling for 1 Million Write-Events/Minute
+## 🚀 Scaling for **1 Million Write-Events/Minute**
 
-To handle 1 million write-events per minute, the backend architecture needs to be highly scalable and resilient:
+To handle **high write throughput**, the backend architecture can be optimized as follows:
 
-Asynchronous Event Tracking:
+- **Asynchronous Event Tracking**: Use message queues like `Kafka` or `RabbitMQ` instead of direct DB writes.
 
-Instead of writing directly to the database on every click, send events to a message queue like Kafka or RabbitMQ.
+- **Batch Writes**: Process events in batches to reduce DB load.
 
-Batch Writes:
+- **Horizontal Scaling**: Deploy multiple backend instances behind a load balancer.
 
-Consumer services process queued events in batches to reduce DB write load.
+- **Database Sharding / Partitioning**: Distribute data load efficiently.
 
-Horizontal Scaling:
+- **NoSQL / Time-Series DB**: For very high throughput, consider `Cassandra`, `DynamoDB`, or `TimescaleDB`.
 
-Multiple backend instances behind a load balancer.
+- **Caching**: Precompute aggregated metrics and store in `Redis` to serve analytics faster.
 
-Database sharding or partitioning to distribute load.
+---
 
-NoSQL / Time-Series DB:
+## 👤 Author
 
-For very high throughput analytics, consider Cassandra, DynamoDB, or TimescaleDB for feature click logs.
-
-Caching:
-
-Precompute aggregated data and store in Redis to serve analytics without hitting DB on every request.
+**Kundan Chouhan**  
+- GitHub: [Kundan Chouhan](https://github.com/kundanchouhan12)  
+- LinkedIn: [Kundan Singh Chouhan](https://www.linkedin.com/in/kundansinghchouhan/)

@@ -51,6 +51,24 @@ The project demonstrates:
    ```bash
    git clone https://github.com/yourusername/product-analytics-dashboard.git
 
+
+📂 Project Structure (Overview)
+frontend/
+  ├─ src/
+  │   ├─ components/     # React components for filters, charts, layout
+  │   ├─ pages/          # Login, Dashboard pages
+  │   └─ utils/          # Cookie handling, API calls
+backend/
+  ├─ src/main/java/com/analytics/dashboard/
+  │   ├─ controller/     # API endpoints
+  │   ├─ model/          # User, FeatureClick entities
+  │   ├─ repository/     # JPA repositories
+  │   ├─ security/       # JWT handling
+  │   └─ service/        # Business logic
+  └─ resources/
+      └─ application.properties
+
+
 2. Configure PostgreSQL in application.properties:
    spring.datasource.url=jdbc:postgresql://localhost:5432/analytics_db
    spring.datasource.username=your_db_username
@@ -74,6 +92,40 @@ Frontend runs at: http://localhost:5173
    Use seeded users or create new users via /register.
 
 ---
+
+.
+
+📊 Dashboard Features
+Filters
+
+Date Range Picker: Select start and end dates
+
+Age Filter: <18, 18-40, >40
+
+Gender Filter: Male, Female, Other
+
+Charts
+
+Bar Chart (Feature Usage)
+
+X-axis: Feature name
+
+Y-axis: Total click count
+
+Interactivity: Clicking a bar updates the Line Chart
+
+Line Chart (Time Trend)
+
+X-axis: Date/Time (grouped by Day or Hour)
+
+Y-axis: Click count for the selected feature
+
+Click Tracking
+
+Every user interaction (filter change or chart click) fires POST /track.
+
+Backend persists click data in PostgreSQL.
+
 
 ## ⚛️ Frontend
 
@@ -112,20 +164,28 @@ Frontend runs at: http://localhost:5173
 ---
 
 ## 🌱 Seed Instructions (Dummy Data)
+ Data Seeding (Dummy Data)
 
-The project includes a seed script to populate the database with **dummy users** and **feature click events** for demonstration.
+The project includes a seed script to populate the database with dummy users and feature click events.
 
-### 🔹 Backend Seed
+Backend Seed
 
-Run backend with:
-```bash
-mvn spring-boot:run
+Ensure backend is running.
+
+Run the seeding class or script:
+
+# Example in Spring Boot
+mvn spring-boot:run -Dspring-boot.run.arguments=--seed
 
 
-Custom Seeding:
-Modify SeedData.java to add more features, users, or dates.
+Seed includes:
 
----
+50-100 dummy users with username, password, age, gender
+
+Feature clicks (date_filter, gender_filter, bar_chart_zoom, etc.) across past 30 days
+
+Modify SeedData.java to customize features, users, or dates.---
+
 
 ## 🚀 Scaling for **1 Million Write-Events/Minute**
 

@@ -53,6 +53,7 @@ The project demonstrates:
 
 
 📂 Project Structure (Overview)
+
 frontend/
 ├─ src/
 │ ├─ components/ # React components for filters, charts, layout

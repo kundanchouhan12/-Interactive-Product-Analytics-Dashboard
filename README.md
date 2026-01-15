@@ -3,7 +3,7 @@ README.md
 # Interactive Product Analytics Dashboard
 
 ## Live Demo
-[View Live Demo](https://your-live-demo-url.com)  
+[View Live Demo]([https://your-live-demo-url.com](https://gregarious-crepe-77d5d2.netlify.app/))  
 *(Replace with your actual deployed frontend URL)*
 
 ---

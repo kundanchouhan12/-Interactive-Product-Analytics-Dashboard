@@ -1,0 +1,60 @@
+import { Card, TextField, Button, Typography, Link } from "@mui/material";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
+
+export default function Login() {
+  const [identifier, setIdentifier] = useState(""); // username or email
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    if (!identifier || !password) {
+      alert("Please enter username/email and password");
+      return;
+    }
+
+    try {
+      const res = await api.post("/auth/login", {
+        usernameOrEmail: identifier, // backend should accept this key
+        password,
+      });
+
+      localStorage.setItem("token", res.data.token);
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      alert("Invalid credentials");
+    }
+  };
+
+  return (
+    <Card sx={{ width: 400, m: "100px auto", p: 4 }}>
+      <Typography variant="h5" mb={2}>Login</Typography>
+
+      <TextField
+        label="Username or Email"
+        fullWidth
+        margin="normal"
+        onChange={(e) => setIdentifier(e.target.value)}
+      />
+
+      <TextField
+        label="Password"
+        type="password"
+        fullWidth
+        margin="normal"
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={handleLogin}>
+        Login
+      </Button>
+
+      <Typography mt={2} align="center">
+        Don’t have an account?{" "}
+        <Link href="/signup">Sign up</Link>
+      </Typography>
+    </Card>
+  );
+}

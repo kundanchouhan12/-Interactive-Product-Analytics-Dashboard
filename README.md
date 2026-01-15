@@ -4,7 +4,7 @@ README.md
 
 ## Live Demo
 [View Live Demo]([https://your-live-demo-url.com](https://gregarious-crepe-77d5d2.netlify.app/))  
-[*(Replace with your actual deployed frontend URL)*
+[*Live Link*
 ](https://gregarious-crepe-77d5d2.netlify.app/)
 ---
 

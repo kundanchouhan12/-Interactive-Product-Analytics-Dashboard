@@ -12,8 +12,7 @@ import {
   Alert,
   Snackbar,
   IconButton,
-  InputAdornment,
-  Link
+  InputAdornment
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -42,6 +41,7 @@ export default function Login({ setToken }) {
       });
 
       if (res.status === 200 && res.data.token) {
+
         // 🔹 Track login (non-blocking)
         api.post("/api/track", { featureName: "login" }).catch(() => {});
 
@@ -124,18 +124,6 @@ export default function Login({ setToken }) {
               {loading ? "Logging in..." : "Login"}
             </Button>
           </Box>
-
-          {/* Signup Link */}
-          <Typography align="center" sx={{ mt: 2 }}>
-            Don’t have an account?{" "}
-            <Link
-              component="button"
-              variant="body2"
-              onClick={() => navigate("/signup")}
-            >
-              Sign up
-            </Link>
-          </Typography>
 
           {/* Error Alert */}
           {error && (

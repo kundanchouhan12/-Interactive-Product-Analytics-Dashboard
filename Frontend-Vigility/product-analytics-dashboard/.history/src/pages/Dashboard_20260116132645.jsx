@@ -4,29 +4,14 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
 import {
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Box,
-  Button,
-  TextField,
+  Container, Grid, Card, CardContent, Typography,
+  FormControl, InputLabel, Select, MenuItem,
+  Box, Button, TextField
 } from "@mui/material";
 
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  LineChart,
-  Line,
-  Legend,
+  BarChart, Bar, XAxis, YAxis, Tooltip,
+  LineChart, Line, Legend
 } from "recharts";
 
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
@@ -36,39 +21,24 @@ import dayjs from "dayjs";
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  const dashboardFeatures = [
-    "date_picker",
-    "filter_age",
-    "chart_bar",
-    "filter_gender",
-  ];
+  const dashboardFeatures = ["date_picker", "filter_age", "chart_bar", "filter_gender"];
 
   const featureMap = {
-    date_picker: ["date_picker"],
-    filter_age: [
-      "filter_age_<18",
-      "filter_age_18-40",
-      "filter_age_>40",
-      "filter_age_all",
-    ],
-    chart_bar: ["chart_bar"],
-    filter_gender: [
-      "filter_gender_Male",
-      "filter_gender_Female",
-      "filter_gender_Other",
-      "filter_gender_all",
-    ],
+    "date_picker": ["date_picker"],
+    "filter_age": ["filter_age_<18", "filter_age_18-40", "filter_age_>40", "filter_age_all"],
+    "chart_bar": ["chart_bar"],
+    "filter_gender": ["filter_gender_Male", "filter_gender_Female", "filter_gender_Other", "filter_gender_all"]
   };
 
   // ---------------- STATE ----------------
   const [filters, setFilters] = useState({
     age: Cookies.get("age") || "",
-    gender: Cookies.get("gender") || "",
+    gender: Cookies.get("gender") || ""
   });
 
   const [dateRange, setDateRange] = useState([
     dayjs(Cookies.get("startDate") || dayjs().subtract(7, "day")),
-    dayjs(Cookies.get("endDate") || dayjs()),
+    dayjs(Cookies.get("endDate") || dayjs())
   ]);
 
   const [tempRange, setTempRange] = useState([...dateRange]);
@@ -89,15 +59,15 @@ export default function Dashboard() {
         startDate: dateRange[0].format("YYYY-MM-DD"),
         endDate: dateRange[1].format("YYYY-MM-DD"),
         age: filters.age || null,
-        gender: filters.gender || null,
+        gender: filters.gender || null
       };
 
       const res = await api.get("/api/analytics", { params });
 
       // ---------------- BAR CHART ----------------
-      const bars = dashboardFeatures.map((f) => {
+      const bars = dashboardFeatures.map(f => {
         let count = 0;
-        Object.keys(res.data.barData || {}).forEach((k) => {
+        Object.keys(res.data.barData || {}).forEach(k => {
           if (featureMap[f].includes(k)) count += res.data.barData[k];
         });
         return { feature: f, count };
@@ -110,36 +80,29 @@ export default function Dashboard() {
         // LEFT chart click → right chart daily clicks
         const keys = featureMap[selectedFeature] || [];
         const datesSet = new Set();
-        keys.forEach((k) =>
-          (res.data.lineData[k] || []).forEach((d) => datesSet.add(d.date))
-        );
+        keys.forEach(k => (res.data.lineData[k] || []).forEach(d => datesSet.add(d.date)));
 
-        line = [...datesSet].sort().map((date) => {
+        line = [...datesSet].sort().map(date => {
           let total = 0;
-          keys.forEach((k) => {
-            const found = (res.data.lineData[k] || []).find(
-              (x) => x.date === date
-            );
+          keys.forEach(k => {
+            const found = (res.data.lineData[k] || []).find(x => x.date === date);
             if (found) total += found.count;
           });
           return { date, clicks: total };
         });
+
       } else {
         // Default: combined 4 features
         const datesSet = new Set();
-        dashboardFeatures.forEach((f) => {
-          featureMap[f].forEach((k) =>
-            (res.data.lineData[k] || []).forEach((d) => datesSet.add(d.date))
-          );
+        dashboardFeatures.forEach(f => {
+          featureMap[f].forEach(k => (res.data.lineData[k] || []).forEach(d => datesSet.add(d.date)));
         });
 
-        line = [...datesSet].sort().map((date) => {
+        line = [...datesSet].sort().map(date => {
           let total = 0;
-          dashboardFeatures.forEach((f) => {
-            featureMap[f].forEach((k) => {
-              const found = (res.data.lineData[k] || []).find(
-                (x) => x.date === date
-              );
+          dashboardFeatures.forEach(f => {
+            featureMap[f].forEach(k => {
+              const found = (res.data.lineData[k] || []).find(x => x.date === date);
               if (found) total += found.count;
             });
           });
@@ -148,6 +111,7 @@ export default function Dashboard() {
       }
 
       setLineData(line);
+
     } catch (err) {
       console.error("Analytics error:", err);
     }
@@ -155,19 +119,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchAnalytics();
-  }, [
-    filters.age,
-    filters.gender,
-    dateRange[0],
-    dateRange[1],
-    selectedFeature,
-  ]);
+  }, [filters.age, filters.gender, dateRange[0], dateRange[1], selectedFeature]);
 
   // ---------------- FILTER HANDLERS ----------------
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     trackClick(`filter_${name}_${value || "all"}`);
-    setFilters((prev) => {
+    setFilters(prev => {
       Cookies.set(name, value);
       return { ...prev, [name]: value };
     });
@@ -175,35 +133,22 @@ export default function Dashboard() {
 
   // ---------------- QUICK DATE ----------------
   const handleQuickDate = (option) => {
-    let start,
-      end = dayjs();
-    switch (option) {
-      case "today":
-        start = dayjs();
-        end = dayjs();
-        break;
-      case "yesterday":
-        start = dayjs().subtract(1, "day");
-        end = dayjs().subtract(1, "day");
-        break;
-      case "last7":
-        start = dayjs().subtract(6, "day");
-        break;
-      case "thisMonth":
-        start = dayjs().startOf("month");
-        break;
+    let start, end = dayjs();
+    switch(option){
+      case "today": start = dayjs(); end = dayjs(); break;
+      case "yesterday": start = dayjs().subtract(1,"day"); end = dayjs().subtract(1,"day"); break;
+      case "last7": start = dayjs().subtract(6,"day"); break;
+      case "thisMonth": start = dayjs().startOf("month"); break;
       case "reset":
-        start = dayjs().subtract(7, "day");
+        start = dayjs().subtract(7,"day");
         end = dayjs();
-        setFilters({ age: "", gender: "" });
-        Cookies.remove("age");
-        Cookies.remove("gender");
+        setFilters({ age:"", gender:""});
+        Cookies.remove("age"); Cookies.remove("gender");
         break;
-      default:
-        return;
+      default: return;
     }
-    setDateRange([start, end]);
-    setTempRange([start, end]);
+    setDateRange([start,end]);
+    setTempRange([start,end]);
     Cookies.set("startDate", start.format("YYYY-MM-DD"));
     Cookies.set("endDate", end.format("YYYY-MM-DD"));
     trackClick("date_picker");
@@ -244,76 +189,50 @@ export default function Dashboard() {
 
   // ---------------- RENDER ----------------
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+    <Container maxWidth="lg" sx={{ py:4 }}>
+      <Box sx={{ display:"flex", justifyContent:"space-between", mb:3 }}>
         <Typography variant="h4">📊 Product Analytics Dashboard</Typography>
-        <Button color="error" variant="contained" onClick={handleLogout}>
-          Logout
-        </Button>
+        <Button color="error" variant="contained" onClick={handleLogout}>Logout</Button>
       </Box>
 
       {/* FILTERS */}
-      <Card sx={{ mb: 4 }}>
+      <Card sx={{ mb:4 }}>
         <CardContent>
           <Typography variant="h6">Filters</Typography>
-          <Box sx={{ display: "flex", gap: 2, my: 2 }}>
-            <Button onClick={() => handleQuickDate("today")}>Today</Button>
-            <Button onClick={() => handleQuickDate("yesterday")}>
-              Yesterday
-            </Button>
-            <Button onClick={() => handleQuickDate("last7")}>
-              Last 7 days
-            </Button>
-            <Button onClick={() => handleQuickDate("thisMonth")}>
-              This Month
-            </Button>
-            <Button onClick={() => setCustomRangeOpen(!customRangeOpen)}>
-              Custom Range
-            </Button>
-            <Button onClick={() => handleQuickDate("reset")}>
-              Reset Filter
-            </Button>
+          <Box sx={{ display:"flex", gap:2, my:2 }}>
+            <Button onClick={()=>handleQuickDate("today")}>Today</Button>
+            <Button onClick={()=>handleQuickDate("yesterday")}>Yesterday</Button>
+            <Button onClick={()=>handleQuickDate("last7")}>Last 7 days</Button>
+            <Button onClick={()=>handleQuickDate("thisMonth")}>This Month</Button>
+            <Button onClick={()=>setCustomRangeOpen(!customRangeOpen)}>Custom Range</Button>
+            <Button onClick={()=>handleQuickDate("reset")}>Reset Filter</Button>
           </Box>
 
           {customRangeOpen && (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <Box
-                sx={{ display: "flex", gap: 2, my: 2, alignItems: "center" }}
-              >
+              <Box sx={{ display:"flex", gap:2, my:2, alignItems:"center" }}>
                 <DatePicker
                   label="Start Date"
                   value={tempRange[0]}
-                  onChange={(v) => setTempRange([v, tempRange[1]])}
-                  renderInput={(p) => <TextField {...p} fullWidth />}
+                  onChange={v => setTempRange([v, tempRange[1]])}
+                  renderInput={p => <TextField {...p} fullWidth/>}
                 />
                 <DatePicker
                   label="End Date"
                   value={tempRange[1]}
-                  onChange={(v) => setTempRange([tempRange[0], v])}
-                  renderInput={(p) => <TextField {...p} fullWidth />}
+                  onChange={v => setTempRange([tempRange[0], v])}
+                  renderInput={p => <TextField {...p} fullWidth/>}
                 />
-                <Button variant="contained" onClick={handleCustomRangeApply}>
-                  Apply
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={handleCustomRangeCancel}
-                >
-                  Cancel
-                </Button>
+                <Button variant="contained" onClick={handleCustomRangeApply}>Apply</Button>
+                <Button variant="outlined" color="error" onClick={handleCustomRangeCancel}>Cancel</Button>
               </Box>
             </LocalizationProvider>
           )}
 
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <FormControl sx={{ minWidth: 120 }}>
+          <Box sx={{ display:"flex", gap:2 }}>
+            <FormControl sx={{ minWidth:120 }}>
               <InputLabel>Age</InputLabel>
-              <Select
-                name="age"
-                value={filters.age}
-                onChange={handleFilterChange}
-              >
+              <Select name="age" value={filters.age} onChange={handleFilterChange}>
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="<18">&lt;18</MenuItem>
                 <MenuItem value="18-40">18-40</MenuItem>
@@ -321,13 +240,9 @@ export default function Dashboard() {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ minWidth: 120 }}>
+            <FormControl sx={{ minWidth:120 }}>
               <InputLabel>Gender</InputLabel>
-              <Select
-                name="gender"
-                value={filters.gender}
-                onChange={handleFilterChange}
-              >
+              <Select name="gender" value={filters.gender} onChange={handleFilterChange}>
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="Male">Male</MenuItem>
                 <MenuItem value="Female">Female</MenuItem>
@@ -345,20 +260,11 @@ export default function Dashboard() {
           <Card>
             <CardContent>
               <Typography variant="h6">Feature Usage</Typography>
-              <BarChart width={500} height={300} data={barData}>
+              <BarChart width={500} height={300} data={barData} onClick={handleBarClick}>
                 <XAxis dataKey="feature" />
                 <YAxis />
                 <Tooltip formatter={(value) => [value, "Clicks"]} />
-                <Bar
-                  dataKey="count"
-                  fill="#6366f1"
-                  // ← Bar-level click handler
-                  onClick={(data, index) => {
-                    const feature = data.feature; // clicked bar
-                    trackClick(`bar_${feature}`); // track API call
-                    setSelectedFeature(feature); // update right chart
-                  }}
-                />
+                <Bar dataKey="count" fill="#6366f1" />
               </BarChart>
             </CardContent>
           </Card>
@@ -372,26 +278,18 @@ export default function Dashboard() {
                 Clicks Daily {selectedFeature && `: ${selectedFeature}`}
               </Typography>
               <LineChart width={500} height={300} data={lineData}>
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip
-                  content={(props) => {
-                    if (!props.active || !props.payload) return null;
-                    const data = props.payload[0].payload;
-                    return (
-                      <div
-                        style={{
-                          backgroundColor: "#fff",
-                          padding: "5px",
-                          border: "1px solid #ccc",
-                        }}
-                      >
-                        <strong>Date:</strong> {data.date} <br />
-                        <strong>Clicks:</strong> {data.clicks}
-                      </div>
-                    );
-                  }}
-                />
+                <XAxis dataKey="date"/>
+                <YAxis/>
+                <Tooltip content={(props) => {
+                  if (!props.active || !props.payload) return null;
+                  const data = props.payload[0].payload;
+                  return (
+                    <div style={{ backgroundColor: "#fff", padding: "5px", border: "1px solid #ccc" }}>
+                      <strong>Date:</strong> {data.date} <br/>
+                      <strong>Clicks:</strong> {data.clicks}
+                    </div>
+                  );
+                }} />
                 <Legend />
                 <Line dataKey="clicks" stroke="#6366f1" />
               </LineChart>
@@ -402,3 +300,4 @@ export default function Dashboard() {
     </Container>
   );
 }
+

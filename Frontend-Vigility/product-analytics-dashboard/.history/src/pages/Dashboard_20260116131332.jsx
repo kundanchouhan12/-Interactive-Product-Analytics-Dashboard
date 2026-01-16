@@ -27,6 +27,7 @@ import {
   LineChart,
   Line,
   Legend,
+  ResponsiveContainer,
 } from "recharts";
 
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
@@ -42,7 +43,6 @@ export default function Dashboard() {
     "chart_bar",
     "filter_gender",
   ];
-
   const featureMap = {
     date_picker: ["date_picker"],
     filter_age: [
@@ -60,7 +60,6 @@ export default function Dashboard() {
     ],
   };
 
-  // ---------------- STATE ----------------
   const [filters, setFilters] = useState({
     age: Cookies.get("age") || "",
     gender: Cookies.get("gender") || "",
@@ -77,12 +76,9 @@ export default function Dashboard() {
   const [selectedFeature, setSelectedFeature] = useState("");
   const [customRangeOpen, setCustomRangeOpen] = useState(false);
 
-  // ---------------- TRACK CLICKS ----------------
-  const trackClick = (featureName) => {
+  const trackClick = (featureName) =>
     api.post("/api/track", { featureName }).catch(() => {});
-  };
 
-  // ---------------- FETCH ANALYTICS ----------------
   const fetchAnalytics = async () => {
     try {
       const params = {
@@ -91,10 +87,8 @@ export default function Dashboard() {
         age: filters.age || null,
         gender: filters.gender || null,
       };
-
       const res = await api.get("/api/analytics", { params });
 
-      // ---------------- BAR CHART ----------------
       const bars = dashboardFeatures.map((f) => {
         let count = 0;
         Object.keys(res.data.barData || {}).forEach((k) => {
@@ -104,10 +98,8 @@ export default function Dashboard() {
       });
       setBarData(bars);
 
-      // ---------------- LINE CHART ----------------
       let line = [];
       if (selectedFeature) {
-        // LEFT chart click → right chart daily clicks
         const keys = featureMap[selectedFeature] || [];
         const datesSet = new Set();
         keys.forEach((k) =>
@@ -125,7 +117,6 @@ export default function Dashboard() {
           return { date, clicks: total };
         });
       } else {
-        // Default: combined 4 features
         const datesSet = new Set();
         dashboardFeatures.forEach((f) => {
           featureMap[f].forEach((k) =>
@@ -163,7 +154,6 @@ export default function Dashboard() {
     selectedFeature,
   ]);
 
-  // ---------------- FILTER HANDLERS ----------------
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     trackClick(`filter_${name}_${value || "all"}`);
@@ -173,7 +163,6 @@ export default function Dashboard() {
     });
   };
 
-  // ---------------- QUICK DATE ----------------
   const handleQuickDate = (option) => {
     let start,
       end = dayjs();
@@ -209,7 +198,6 @@ export default function Dashboard() {
     trackClick("date_picker");
   };
 
-  // ---------------- CUSTOM RANGE APPLY/CANCEL ----------------
   const handleCustomRangeApply = () => {
     setDateRange([...tempRange]);
     Cookies.set("startDate", tempRange[0].format("YYYY-MM-DD"));
@@ -223,15 +211,13 @@ export default function Dashboard() {
     setCustomRangeOpen(false);
   };
 
-  // ---------------- BAR CLICK ----------------
   const handleBarClick = (state) => {
     if (!state?.activePayload?.length) return;
     const feature = state.activePayload[0].payload.feature;
     trackClick(`bar_${feature}`);
-    setSelectedFeature(feature); // ← triggers right chart
+    setSelectedFeature(feature);
   };
 
-  // ---------------- LOGOUT ----------------
   const handleLogout = () => {
     trackClick("logout");
     localStorage.clear();
@@ -242,10 +228,17 @@ export default function Dashboard() {
     navigate("/login", { replace: true });
   };
 
-  // ---------------- RENDER ----------------
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          mb: 3,
+          flexWrap: "wrap",
+          gap: 2,
+        }}
+      >
         <Typography variant="h4">📊 Product Analytics Dashboard</Typography>
         <Button color="error" variant="contained" onClick={handleLogout}>
           Logout
@@ -256,7 +249,7 @@ export default function Dashboard() {
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Typography variant="h6">Filters</Typography>
-          <Box sx={{ display: "flex", gap: 2, my: 2 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, my: 2 }}>
             <Button onClick={() => handleQuickDate("today")}>Today</Button>
             <Button onClick={() => handleQuickDate("yesterday")}>
               Yesterday
@@ -278,7 +271,13 @@ export default function Dashboard() {
           {customRangeOpen && (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <Box
-                sx={{ display: "flex", gap: 2, my: 2, alignItems: "center" }}
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 2,
+                  my: 2,
+                  alignItems: "center",
+                }}
               >
                 <DatePicker
                   label="Start Date"
@@ -306,7 +305,7 @@ export default function Dashboard() {
             </LocalizationProvider>
           )}
 
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
             <FormControl sx={{ minWidth: 120 }}>
               <InputLabel>Age</InputLabel>
               <Select
@@ -338,28 +337,26 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* CHARTS */}
-      <Grid container spacing={4}>
+      <Grid
+        container
+        spacing={4}
+        direction={{ xs: "column", md: "row" }} // mobile -> column, desktop -> row
+      >
         {/* LEFT BAR CHART */}
         <Grid item xs={12} md={6}>
-          <Card>
+          <Card sx={{ mb: { xs: 4, md: 0 } }}>
+            {" "}
+            {/* mobile me margin bottom add */}
             <CardContent>
               <Typography variant="h6">Feature Usage</Typography>
-              <BarChart width={500} height={300} data={barData}>
-                <XAxis dataKey="feature" />
-                <YAxis />
-                <Tooltip formatter={(value) => [value, "Clicks"]} />
-                <Bar
-                  dataKey="count"
-                  fill="#6366f1"
-                  // ← Bar-level click handler
-                  onClick={(data, index) => {
-                    const feature = data.feature; // clicked bar
-                    trackClick(`bar_${feature}`); // track API call
-                    setSelectedFeature(feature); // update right chart
-                  }}
-                />
-              </BarChart>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={barData} onClick={handleBarClick}>
+                  <XAxis dataKey="feature" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [value, "Clicks"]} />
+                  <Bar dataKey="count" fill="#6366f1" />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </Grid>
@@ -371,30 +368,32 @@ export default function Dashboard() {
               <Typography variant="h6">
                 Clicks Daily {selectedFeature && `: ${selectedFeature}`}
               </Typography>
-              <LineChart width={500} height={300} data={lineData}>
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip
-                  content={(props) => {
-                    if (!props.active || !props.payload) return null;
-                    const data = props.payload[0].payload;
-                    return (
-                      <div
-                        style={{
-                          backgroundColor: "#fff",
-                          padding: "5px",
-                          border: "1px solid #ccc",
-                        }}
-                      >
-                        <strong>Date:</strong> {data.date} <br />
-                        <strong>Clicks:</strong> {data.clicks}
-                      </div>
-                    );
-                  }}
-                />
-                <Legend />
-                <Line dataKey="clicks" stroke="#6366f1" />
-              </LineChart>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={lineData}>
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip
+                    content={(props) => {
+                      if (!props.active || !props.payload) return null;
+                      const data = props.payload[0].payload;
+                      return (
+                        <div
+                          style={{
+                            backgroundColor: "#fff",
+                            padding: "5px",
+                            border: "1px solid #ccc",
+                          }}
+                        >
+                          <strong>Date:</strong> {data.date} <br />
+                          <strong>Clicks:</strong> {data.clicks}
+                        </div>
+                      );
+                    }}
+                  />
+                  <Legend />
+                  <Line dataKey="clicks" stroke="#6366f1" />
+                </LineChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </Grid>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import {
@@ -10,19 +10,13 @@ import {
   Button,
   Box,
   Alert,
-  Snackbar,
-  IconButton,
-  InputAdornment,
-  Link
+  Snackbar
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function Login({ setToken }) {
   const navigate = useNavigate();
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -31,21 +25,15 @@ export default function Login({ setToken }) {
   // ---------------- LOGIN HANDLER ----------------
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setSuccessMsg("");
+    setOpenSnackbar(false);
+    setLoading(true);
 
     try {
-      // 🔹 Hit auth API
-      const res = await api.post("/auth/login", {
-        username,
-        password
-      });
+      const res = await api.post("/auth/login", { username, password });
 
       if (res.status === 200 && res.data.token) {
-        // 🔹 Track login (non-blocking)
-        api.post("/api/track", { featureName: "login" }).catch(() => {});
-
-        // 🔹 Save token & userId
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("userId", res.data.userId);
         setToken(res.data.token);
@@ -53,27 +41,43 @@ export default function Login({ setToken }) {
         setSuccessMsg("Login successful! Redirecting...");
         setOpenSnackbar(true);
 
-        // 🔹 Redirect after short delay
-        setTimeout(() => navigate("/dashboard"), 1200);
+        // Redirect after 1.5s
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
+      } else {
+        setError(res.data.message || "Login failed");
       }
     } catch (err) {
-      setError("Invalid credentials");
+      console.error("Login error:", err);
+      setError(
+        (err.response && err.response.data?.message) || "Login failed. Try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const handleRegisterRedirect = () => {
+    navigate("/signup");
+  };
+
+  const handleSnackbarClose = () => {
+    setOpenSnackbar(false);
+  };
+
+  // ---------------- RENDER ----------------
   return (
     <Container
       maxWidth="sm"
       sx={{
-        minHeight: "100vh",
         display: "flex",
+        justifyContent: "center",
         alignItems: "center",
-        justifyContent: "center"
+        minHeight: "100vh",
       }}
     >
-      <Card sx={{ width: "100%", borderRadius: 3, boxShadow: 3 }}>
+      <Card sx={{ width: "100%", boxShadow: 3, borderRadius: 3 }}>
         <CardContent>
           <Typography variant="h4" align="center" gutterBottom>
             🔐 Login
@@ -82,36 +86,24 @@ export default function Login({ setToken }) {
           <Box
             component="form"
             onSubmit={handleLogin}
-            sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3 }}
+            sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 2 }}
           >
             <TextField
               label="Username"
+              variant="outlined"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
               fullWidth
             />
-
             <TextField
               label="Password"
-              type={showPassword ? "text" : "password"}
+              type="password"
+              variant="outlined"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               fullWidth
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                      aria-label="toggle password visibility"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
             />
 
             <Button
@@ -123,19 +115,16 @@ export default function Login({ setToken }) {
             >
               {loading ? "Logging in..." : "Login"}
             </Button>
-          </Box>
 
-          {/* Signup Link */}
-          <Typography align="center" sx={{ mt: 2 }}>
-            Don’t have an account?{" "}
-            <Link
-              component="button"
-              variant="body2"
-              onClick={() => navigate("/signup")}
+            <Button
+              variant="text"
+              color="secondary"
+              onClick={handleRegisterRedirect}
+              sx={{ fontWeight: "bold" }}
             >
-              Sign up
-            </Link>
-          </Typography>
+              Don’t have an account? Create one
+            </Button>
+          </Box>
 
           {/* Error Alert */}
           {error && (
@@ -148,7 +137,7 @@ export default function Login({ setToken }) {
           <Snackbar
             open={openSnackbar}
             autoHideDuration={1500}
-            onClose={() => setOpenSnackbar(false)}
+            onClose={handleSnackbarClose}
             message={successMsg}
             anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
           />

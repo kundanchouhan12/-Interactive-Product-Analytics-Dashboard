@@ -9,10 +9,6 @@ import {
   TextField,
   Button,
   Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Alert,
   Snackbar,
   IconButton,
@@ -20,28 +16,18 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-export default function Signup() {
-  const [form, setForm] = useState({
-    username: "",
-    password: "",
-    age: "",
-    gender: "Male",
-  });
-
+export default function Login({ setToken }) {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
-
-  // ---------------- FORM HANDLERS ----------------
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSignup = async (e) => {
+  // ---------------- LOGIN HANDLER ----------------
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setSuccessMsg("");
@@ -49,39 +35,35 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await api.post("/auth/register", form);
+      const res = await api.post("/auth/login", { username, password });
 
-      if (res.status === 200) {
-        setSuccessMsg("Account created successfully!");
+      if (res.status === 200 && res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("userId", res.data.userId);
+        setToken(res.data.token);
+
+        setSuccessMsg("Login successful! Redirecting...");
         setOpenSnackbar(true);
 
-        // Redirect to login after 1.5s
+        // Redirect after 1.5s
         setTimeout(() => {
-          navigate("/login");
+          navigate("/dashboard");
         }, 1500);
-      } else if (res.data.message) {
-        setError(res.data.message); // User already exists
+      } else {
+        setError(res.data.message || "Login failed");
       }
     } catch (err) {
-      console.error("Signup failed", err);
-      let message = "Signup failed. Try again.";
-      if (err.response && err.response.data) {
-        if (typeof err.response.data === "string") {
-          message = err.response.data;
-        } else if (err.response.data.message) {
-          message = err.response.data.message;
-        } else {
-          message = JSON.stringify(err.response.data);
-        }
-      }
-      setError(message);
+      console.error("Login error:", err);
+      setError(
+        (err.response && err.response.data?.message) || "Login failed. Try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLoginRedirect = () => {
-    navigate("/login");
+  const handleRegisterRedirect = () => {
+    navigate("/signup");
   };
 
   const handleSnackbarClose = () => {
@@ -106,31 +88,29 @@ export default function Signup() {
       <Card sx={{ width: "100%", boxShadow: 3, borderRadius: 3 }}>
         <CardContent>
           <Typography variant="h4" align="center" gutterBottom>
-            📝 Signup
+            🔐 Login
           </Typography>
 
           <Box
             component="form"
-            onSubmit={handleSignup}
+            onSubmit={handleLogin}
             sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 2 }}
           >
             <TextField
               label="Username"
-              name="username"
               variant="outlined"
-              value={form.username}
-              onChange={handleChange}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               fullWidth
             />
 
             <TextField
               label="Password"
-              name="password"
               type={showPassword ? "text" : "password"}
               variant="outlined"
-              value={form.password}
-              onChange={handleChange}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               fullWidth
               InputProps={{
@@ -148,31 +128,6 @@ export default function Signup() {
               }}
             />
 
-            <TextField
-              label="Age"
-              name="age"
-              type="number"
-              variant="outlined"
-              value={form.age}
-              onChange={handleChange}
-              required
-              fullWidth
-            />
-
-            <FormControl fullWidth>
-              <InputLabel>Gender</InputLabel>
-              <Select
-                name="gender"
-                value={form.gender}
-                onChange={handleChange}
-                label="Gender"
-              >
-                <MenuItem value="Male">Male</MenuItem>
-                <MenuItem value="Female">Female</MenuItem>
-                <MenuItem value="Other">Other</MenuItem>
-              </Select>
-            </FormControl>
-
             <Button
               type="submit"
               variant="contained"
@@ -180,16 +135,16 @@ export default function Signup() {
               disabled={loading}
               sx={{ py: 1.5, fontWeight: "bold" }}
             >
-              {loading ? "Signing up..." : "Signup"}
+              {loading ? "Logging in..." : "Login"}
             </Button>
 
             <Button
               variant="text"
               color="secondary"
-              onClick={handleLoginRedirect}
+              onClick={handleRegisterRedirect}
               sx={{ fontWeight: "bold" }}
             >
-              Already have an account? Login
+              Don’t have an account? Create one
             </Button>
           </Box>
 

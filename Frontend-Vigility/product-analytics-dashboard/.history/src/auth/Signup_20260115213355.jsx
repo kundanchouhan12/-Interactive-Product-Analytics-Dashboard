@@ -14,11 +14,8 @@ import {
   Select,
   MenuItem,
   Alert,
-  Snackbar,
-  IconButton,
-  InputAdornment
+  Snackbar
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function Signup() {
   const [form, setForm] = useState({
@@ -28,12 +25,9 @@ export default function Signup() {
     gender: "Male",
   });
 
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
 
   // ---------------- FORM HANDLERS ----------------
@@ -46,16 +40,16 @@ export default function Signup() {
     setError("");
     setSuccessMsg("");
     setOpenSnackbar(false);
-    setLoading(true);
 
     try {
       const res = await api.post("/auth/register", form);
 
       if (res.status === 200) {
+        // ✅ Signup successful
         setSuccessMsg("Account created successfully!");
         setOpenSnackbar(true);
 
-        // Redirect to login after 1.5s
+        // Redirect to login after 1.5 seconds
         setTimeout(() => {
           navigate("/login");
         }, 1500);
@@ -75,8 +69,6 @@ export default function Signup() {
         }
       }
       setError(message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -86,10 +78,6 @@ export default function Signup() {
 
   const handleSnackbarClose = () => {
     setOpenSnackbar(false);
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
   };
 
   // ---------------- RENDER ----------------
@@ -123,31 +111,16 @@ export default function Signup() {
               required
               fullWidth
             />
-
             <TextField
               label="Password"
               name="password"
-              type={showPassword ? "text" : "password"}
+              type="password"
               variant="outlined"
               value={form.password}
               onChange={handleChange}
               required
               fullWidth
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={togglePasswordVisibility}
-                      edge="end"
-                      aria-label="toggle password visibility"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
             />
-
             <TextField
               label="Age"
               name="age"
@@ -158,7 +131,6 @@ export default function Signup() {
               required
               fullWidth
             />
-
             <FormControl fullWidth>
               <InputLabel>Gender</InputLabel>
               <Select
@@ -177,10 +149,9 @@ export default function Signup() {
               type="submit"
               variant="contained"
               color="primary"
-              disabled={loading}
               sx={{ py: 1.5, fontWeight: "bold" }}
             >
-              {loading ? "Signing up..." : "Signup"}
+              Signup
             </Button>
 
             <Button

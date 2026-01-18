@@ -17,8 +17,6 @@ import {
   Button,
   IconButton,
   Skeleton,
-  useTheme,
-  useMediaQuery,
 } from "@mui/material";
 
 import { Brightness4, Brightness7 } from "@mui/icons-material";
@@ -32,13 +30,11 @@ import {
   Tooltip,
   LineChart,
   Line,
+  ResponsiveContainer,
 } from "recharts";
 
 import dayjs from "dayjs";
 import { ColorModeContext } from "../context/ThemeContext";
-
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 /* ================= CONFIG ================= */
 
@@ -74,9 +70,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { mode, toggleColorMode } = useContext(ColorModeContext);
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
   const [filters, setFilters] = useState({
     age: Cookies.get("age") || "",
     gender: Cookies.get("gender") || "",
@@ -87,7 +80,6 @@ export default function Dashboard() {
     dayjs(Cookies.get("endDate") || dayjs()),
   ]);
 
-  const [customOpen, setCustomOpen] = useState(false);
   const [barData, setBarData] = useState([]);
   const [lineData, setLineData] = useState([]);
   const [selectedFeature, setSelectedFeature] = useState("");
@@ -130,14 +122,14 @@ export default function Dashboard() {
 
       const dates = new Set();
       keys.forEach((k) =>
-        (res.data.lineData[k] || []).forEach((d) => dates.add(d.date))
+        (res.data.lineData[k] || []).forEach((d) => dates.add(d.date)),
       );
 
       const line = [...dates].sort().map((date) => {
         let total = 0;
         keys.forEach((k) => {
           const found = (res.data.lineData[k] || []).find(
-            (x) => x.date === date
+            (x) => x.date === date,
           );
           if (found) total += found.count;
         });
@@ -169,11 +161,9 @@ export default function Dashboard() {
     let start = dayjs();
     let end = dayjs();
 
-    if (type === "today") start = end = dayjs();
     if (type === "yesterday") start = end = dayjs().subtract(1, "day");
     if (type === "last7") start = dayjs().subtract(6, "day");
     if (type === "thisMonth") start = dayjs().startOf("month");
-
     if (type === "reset") {
       start = dayjs().subtract(7, "day");
       setFilters({ age: "", gender: "" });
@@ -185,13 +175,6 @@ export default function Dashboard() {
     Cookies.set("startDate", start.format("YYYY-MM-DD"));
     Cookies.set("endDate", end.format("YYYY-MM-DD"));
     trackClick("date_picker");
-  };
-
-  const applyCustomRange = () => {
-    Cookies.set("startDate", dateRange[0].format("YYYY-MM-DD"));
-    Cookies.set("endDate", dateRange[1].format("YYYY-MM-DD"));
-    trackClick("date_picker_custom");
-    setCustomOpen(false);
   };
 
   const handleLogout = () => {
@@ -246,68 +229,28 @@ export default function Dashboard() {
             Filters
           </Typography>
 
-          {/* QUICK DATE */}
-          <Box
-            display="flex"
-            gap={2}
-            rowGap={1.5}
-            flexWrap="wrap"
-            mb={2}
-          >
-            {["today", "yesterday", "last7", "thisMonth", "custom", "reset"].map(
-              (k) => (
-                <Button
-                  key={k}
-                  size="small"
-                  variant={k === "custom" ? "contained" : "outlined"}
-                  onClick={() =>
-                    k === "custom" ? setCustomOpen(true) : handleQuickDate(k)
-                  }
-                >
-                  {k === "last7"
-                    ? "LAST 7 DAYS"
-                    : k === "thisMonth"
-                    ? "THIS MONTH"
-                    : k.toUpperCase()}
-                </Button>
-              )
-            )}
+          <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
+            {["today", "yesterday", "last 7", "this Month", "reset"].map((k) => (
+              <Button
+                key={k}
+                size="small"
+                variant="outlined"
+                onClick={() => handleQuickDate(k)}
+              >
+                {k}
+              </Button>
+            ))}
           </Box>
 
-          {/* CUSTOM RANGE */}
-          {customOpen && (
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <Box display="flex" gap={2} flexWrap="wrap" mb={3}>
-                <DatePicker
-                  label="Start Date"
-                  value={dateRange[0]}
-                  onChange={(v) => setDateRange([v, dateRange[1]])}
-                />
-                <DatePicker
-                  label="End Date"
-                  value={dateRange[1]}
-                  onChange={(v) => setDateRange([dateRange[0], v])}
-                />
-                <Button variant="contained" color="success" onClick={applyCustomRange}>
-                  Apply
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={() => setCustomOpen(false)}
-                >
-                  Cancel
-                </Button>
-              </Box>
-            </LocalizationProvider>
-          )}
-
-          {/* AGE / GENDER */}
           <Grid container spacing={2}>
             <Grid item xs={12} sm="auto">
-              <FormControl sx={{ minWidth: 280, maxWidth: 300 }}>
+              <FormControl sx={{ minWidth: 220, maxWidth: 260 }} fullWidth>
                 <InputLabel>Age</InputLabel>
-                <Select name="age" value={filters.age} onChange={handleFilterChange}>
+                <Select
+                  name="age"
+                  value={filters.age}
+                  onChange={handleFilterChange}
+                >
                   <MenuItem value="">All</MenuItem>
                   <MenuItem value="<18">&lt;18</MenuItem>
                   <MenuItem value="18-40">18-40</MenuItem>
@@ -317,7 +260,7 @@ export default function Dashboard() {
             </Grid>
 
             <Grid item xs={12} sm="auto">
-              <FormControl sx={{ minWidth: 280, maxWidth: 300 }}>
+              <FormControl sx={{ minWidth: 220, maxWidth: 260 }} fullWidth>
                 <InputLabel>Gender</InputLabel>
                 <Select
                   name="gender"
@@ -345,19 +288,20 @@ export default function Dashboard() {
               {loading ? (
                 <Skeleton height={300} />
               ) : (
-                <Box sx={{ overflowX: isMobile ? "auto" : "hidden" }}>
-                  <Box sx={{ width: 500, minWidth: 500 }}>
-                    <BarChart width={500} height={300} data={barData}>
-                      <XAxis dataKey="feature" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar
-                        dataKey="count"
-                        fill="#6366f1"
-                        onClick={(d) => setSelectedFeature(d.feature)}
-                      />
-                    </BarChart>
-                  </Box>
+                <Box height={300}>
+                  <BarChart width={500} height={300} data={barData}>
+                    <XAxis dataKey="feature" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar
+                      dataKey="count"
+                      fill="#6366f1"
+                      onClick={(d) => {
+                        trackClick(`bar_${d.feature}`);
+                        setSelectedFeature(d.feature);
+                      }}
+                    />
+                  </BarChart>
                 </Box>
               )}
             </CardContent>
@@ -371,23 +315,22 @@ export default function Dashboard() {
               <Typography variant="h6">
                 Daily Clicks {selectedFeature && `: ${selectedFeature}`}
               </Typography>
+
               {loading ? (
                 <Skeleton height={300} />
               ) : (
-                <Box sx={{ overflowX: isMobile ? "auto" : "hidden" }}>
-                  <Box sx={{ width: 500, minWidth: 500 }}>
-                    <LineChart width={500} height={300} data={lineData}>
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line
-                        dataKey="clicks"
-                        stroke="#22d3ee"
-                        strokeWidth={3}
-                        dot={{ r: 4 }}
-                      />
-                    </LineChart>
-                  </Box>
+                <Box height={300}>
+                  <LineChart width={500} height={300} data={lineData}>
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line
+                      dataKey="clicks"
+                      stroke="#22d3ee"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                    />
+                  </LineChart>
                 </Box>
               )}
             </CardContent>

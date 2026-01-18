@@ -4,9 +4,9 @@ import App from "./App";
 import ThemeContextProvider from "./context/ThemeContext";
 import CssBaseline from "@mui/material/CssBaseline";
 
-
 ReactDOM.createRoot(document.getElementById("root")).render(
   <ThemeContextProvider>
+    <CssBaseline />
     <App />
   </ThemeContextProvider>
 );

@@ -3,8 +3,6 @@ import { useState, useEffect } from "react";
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
 import Dashboard from "./pages/Dashboard";
-import PublicRoute from "./routes/PublicRoute";
-import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));

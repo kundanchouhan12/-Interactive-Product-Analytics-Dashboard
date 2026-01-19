@@ -124,20 +124,22 @@ export default function Dashboard() {
 
       setBarData(bars);
 
+      setBarData(bars);
+
       const keys = selectedFeature
         ? featureMap[selectedFeature]
         : [].concat(...Object.values(featureMap));
 
       const dates = new Set();
       keys.forEach((k) =>
-        (res.data.lineData[k] || []).forEach((d) => dates.add(d.date))
+        (res.data.lineData[k] || []).forEach((d) => dates.add(d.date)),
       );
 
       const line = [...dates].sort().map((date) => {
         let total = 0;
         keys.forEach((k) => {
           const found = (res.data.lineData[k] || []).find(
-            (x) => x.date === date
+            (x) => x.date === date,
           );
           if (found) total += found.count;
         });
@@ -247,31 +249,30 @@ export default function Dashboard() {
           </Typography>
 
           {/* QUICK DATE */}
-          <Box
-            display="flex"
-            gap={2}
-            rowGap={1.5}
-            flexWrap="wrap"
-            mb={2}
-          >
-            {["today", "yesterday", "last7", "thisMonth", "custom", "reset"].map(
-              (k) => (
-                <Button
-                  key={k}
-                  size="small"
-                  variant={k === "custom" ? "contained" : "outlined"}
-                  onClick={() =>
-                    k === "custom" ? setCustomOpen(true) : handleQuickDate(k)
-                  }
-                >
-                  {k === "last7"
-                    ? "LAST 7 DAYS"
-                    : k === "thisMonth"
+          <Box display="flex" gap={2} rowGap={1.5} flexWrap="wrap" mb={2}>
+            {[
+              "today",
+              "yesterday",
+              "last7",
+              "thisMonth",
+              "custom",
+              "reset",
+            ].map((k) => (
+              <Button
+                key={k}
+                size="small"
+                variant={k === "custom" ? "contained" : "outlined"}
+                onClick={() =>
+                  k === "custom" ? setCustomOpen(true) : handleQuickDate(k)
+                }
+              >
+                {k === "last7"
+                  ? "LAST 7 DAYS"
+                  : k === "thisMonth"
                     ? "THIS MONTH"
                     : k.toUpperCase()}
-                </Button>
-              )
-            )}
+              </Button>
+            ))}
           </Box>
 
           {/* CUSTOM RANGE */}
@@ -288,7 +289,11 @@ export default function Dashboard() {
                   value={dateRange[1]}
                   onChange={(v) => setDateRange([dateRange[0], v])}
                 />
-                <Button variant="contained" color="success" onClick={applyCustomRange}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={applyCustomRange}
+                >
                   Apply
                 </Button>
                 <Button
@@ -307,7 +312,11 @@ export default function Dashboard() {
             <Grid item xs={12} sm="auto">
               <FormControl sx={{ minWidth: 280, maxWidth: 300 }}>
                 <InputLabel>Age</InputLabel>
-                <Select name="age" value={filters.age} onChange={handleFilterChange}>
+                <Select
+                  name="age"
+                  value={filters.age}
+                  onChange={handleFilterChange}
+                >
                   <MenuItem value="">All</MenuItem>
                   <MenuItem value="<18">&lt;18</MenuItem>
                   <MenuItem value="18-40">18-40</MenuItem>
@@ -353,8 +362,14 @@ export default function Dashboard() {
                       <Tooltip />
                       <Bar
                         dataKey="count"
+                        minPointSize={6}
+                        cursor="pointer"
                         fill="#6366f1"
-                        onClick={(d) => setSelectedFeature(d.feature)}
+                        onClick={(data) => {
+                          setSelectedFeature(data.feature);
+                          trackClick("chart_bar");
+                          trackClick("bar_chart_bar");
+                        }}
                       />
                     </BarChart>
                   </Box>

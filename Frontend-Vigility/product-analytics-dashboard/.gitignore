@@ -24,4 +24,5 @@ dist-ssr
 *.sw?
 
 Frontend-Vigility/product-analytics-dashboard/.history/
-
+# Environment files
+*.env
